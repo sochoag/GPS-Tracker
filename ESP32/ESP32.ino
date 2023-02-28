@@ -103,6 +103,6 @@ void loop()
   {
     lastMsg = now;
     Serial.println("Publishing:" + lectura);
-    client.publish("Sochoag/feeds/adquisicion-map-and-analog.location", lectura.c_str());
+    client.publish("YourTopic", lectura.c_str());
   }
 }
