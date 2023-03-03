@@ -9,7 +9,8 @@ void sendData(){
     lastSend = millis();  
     // Serial.println(latitud);
     DynamicJsonDocument doc(200);
-    doc["value"] = analogLecture;
+    doc["value"]["sensor-1"] = analogLecture;
+    doc["value"]["sensor-2"] = altura;
     doc["lat"] = latitud;
     doc["lon"] = longitud;
     doc["ele"] = altura;

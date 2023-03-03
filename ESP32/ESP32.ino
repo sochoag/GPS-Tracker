@@ -14,19 +14,25 @@ SoftwareSerial Serial2(D5, D5); // RX, TX
 
 #endif
 
+#include <ArduinoJson.h>
 #include <PubSubClient.h>
 
-const char *ssid = "yourSSID";
-const char *password = "yourPass";
+const char *ssid = "Galaxy A10s9997"; // WIFI
+const char *password = "afst8509";
 const char *mqtt_server = "io.adafruit.com";
-#define user "yourUser"
-#define key "yourAPI"
+#define user "0302902150" // ADAFRUIT
+#define key "aio_LErp88urN2O6TRHrKCpXaitpvSXu"
+#define topicAnalog "0302902150/feeds/gps.analog"
+#define topicAltitud "0302902150/feeds/gps.altitud"
 WiFiClient espClient;
 PubSubClient client(espClient);
 unsigned long lastMsg = 0;
 #define MSG_BUFFER_SIZE (70)
 char msg[MSG_BUFFER_SIZE];
 String lectura = "";
+DynamicJsonDocument doc(200);
+int analogLecture, altitud;
+
 
 void setup_wifi()
 {
@@ -93,16 +99,27 @@ void loop()
   if (Serial2.available())
   {
     lectura = Serial2.readStringUntil('\n');
-    // Serial.println(lectura);
   }
+  DeserializationError error = deserializeJson(doc, lectura);
 
   client.loop();
 
   unsigned long now = millis();
   if (now - lastMsg > 5000 && lectura != "")
   {
+    String toSend ="";
     lastMsg = now;
-    Serial.println("Publishing:" + lectura);
-    client.publish("YourTopic", lectura.c_str());
+    //serializeJsonPretty(doc,Serial);
+    analogLecture = doc["value"]["sensor-1"];
+    altitud = doc["value"]["sensor-2"];
+    doc["value"] = analogLecture;
+    serializeJson(doc,toSend);
+    Serial.println("Publishing analog:" + toSend);
+    client.publish(topicAnalog, toSend.c_str());
+    doc["value"] = altitud;
+    toSend = "";
+    serializeJson(doc,toSend);
+    Serial.println("Publishing altitud:" + toSend);
+    client.publish(topicAltitud, toSend.c_str());
   }
 }
